@@ -1,16 +1,16 @@
 import torch
-from transformers import AutoModelForTokenClassification, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-model_path = "Dmeta-embedding-zh"
+model_path = "source_models/reader-lm-0.5b"
 
 
-model_original = AutoModelForTokenClassification.from_pretrained(
+model_original = AutoModelForCausalLM.from_pretrained(
     model_path, trust_remote_code=True
 )
 tokenizer_original = AutoTokenizer.from_pretrained(model_path)
 
 
-save_path = "Dmeta-embedding-zh/onnx"
+save_path = "source_models/reader-lm-0.5b/onnx"
 dummy_model_input = tokenizer_original(
     "This is a test for ONNX Runtime!", return_tensors="pt"
 )
@@ -21,7 +21,6 @@ result = torch.onnx.export(
     model_original,
     tuple(dummy_model_input.values()),
     f"{save_path}/model.onnx",
-    input_names=["input_ids", "attention_mask"],
     output_names=["logits", "last_hidden_state"],
     dynamic_axes={
         "input_ids": {0: "batch_size", 1: "sequence"},
