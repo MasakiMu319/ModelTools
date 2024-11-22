@@ -10,10 +10,10 @@ tokenizer_original = AutoTokenizer.from_pretrained(model_name_or_path)
 model_original = AutoModelForSequenceClassification.from_pretrained(
     model_name_or_path,
     trust_remote_code=True,
-    # torch_dtype=torch.float32,
+    torch_dtype=torch.float16,
     revision=revision,
 )
-model_original = model_original.float()
+# model_original = model_original.float()
 
 save_path = Path("./source_models/gte-reranker/onnx")
 
