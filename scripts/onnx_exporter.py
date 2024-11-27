@@ -5,7 +5,7 @@ import netron
 
 
 # model name or ID in hugging face.
-model_name_or_path = Path("./Conan-embedding/")
+model_name_or_path = Path("./source_models/Conan-embedding/")
 # where to save the model.
 save_path = model_name_or_path.joinpath("onnx")
 
@@ -43,19 +43,13 @@ print(f"Output names: {output_names}")
 for key in output_names:
     dynamic_axes[key] = {0: "batch_size", 1: "sequence"}
 
-result = torch.onnx.export(
-    model=model,
-    args=tuple(model_input.values()),
-    f=save_path.joinpath("model.onnx"),
-    input_names=list(model_input.keys()),
-    output_names=output_names,
-    opset_version=17,
-    dynamic_axes=dynamic_axes,
-    verbose=True,
-    verify=True,
-    profile=True,
-    report=True,
-)
+export_options = torch.onnx.ExportOptions(dynamic_shapes=True)
+dynamo_result = torch.onnx.dynamo_export(
+    model,
+    # *tuple(model_input.values()),
+    export_options=export_options,
+    **{key: value for key, value in model_input.items()},
+).save(save_path.joinpath("model.onnx"))
 
 print(f"Model saved at: {save_path}")
 tokenizer.save_pretrained(f"{save_path}")
