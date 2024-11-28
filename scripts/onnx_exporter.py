@@ -41,7 +41,7 @@ output_names = [
 ]
 print(f"Output names: {output_names}")
 for key in output_names:
-    dynamic_axes[key] = {0: "batch_size", 1: "sequence"}
+    dynamic_axes[key] = {0: "batch_size"}
 
 export_options = torch.onnx.ExportOptions(dynamic_shapes=True)
 dynamo_result = torch.onnx.dynamo_export(

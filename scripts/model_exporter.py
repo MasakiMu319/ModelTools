@@ -47,6 +47,8 @@ class ONNXExporter:
 
     def export(self, save_path: str | PathLike):
         save_path = Path(save_path) if isinstance(save_path, str) else save_path
+        if not save_path.exists():
+            save_path.mkdir(parents=True)
 
         self.model.eval()
 
@@ -62,9 +64,18 @@ class ONNXExporter:
             verify=True,
         )
 
+    def save_tokenizer(self, save_path: str | PathLike):
+        save_path = Path(save_path) if isinstance(save_path, str) else save_path
+
+        if not save_path.exists():
+            save_path.mkdir(parents=True)
+
+        self.tokenizer.save_pretrained(save_path)
+
 
 if __name__ == "__main__":
     model_name_or_path = Path("./source_models/gte-multilingual-base")
+    save_path = model_name_or_path.joinpath("onnx")
     model = AutoModelForTokenClassification.from_pretrained(
         model_name_or_path,
         trust_remote_code=True,
@@ -76,5 +87,8 @@ if __name__ == "__main__":
         local_files_only=True,
     )
     onnx_exporter = ONNXExporter(model=model, tokenizer=tokenizer)
-    onnx_result = onnx_exporter.export(model_name_or_path)
-    netron.start(str(model_name_or_path.joinpath("model.onnx")))
+
+    onnx_result = onnx_exporter.export(save_path=save_path)
+    onnx_exporter.save_tokenizer(save_path=save_path)
+
+    netron.start(str(save_path.joinpath("model.onnx")))
