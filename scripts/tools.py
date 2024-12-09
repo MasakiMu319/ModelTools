@@ -1,26 +1,38 @@
-from pathlib import Path
-from transformers import AutoModel, AutoTokenizer
+#!/usr/bin/env python3
 
-model_name_or_path = Path("./source_models/Conan-embedding/")
-tokenizer = AutoTokenizer.from_pretrained(
-    model_name_or_path, trust_remote_code=True, local_files_only=True
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("stabilityai/stablelm-2-1_6b")
+model = AutoModelForCausalLM.from_pretrained(
+    "stabilityai/stablelm-2-1_6b",
+    torch_dtype="auto",
 )
-model = AutoModel.from_pretrained(
-    model_name_or_path,
-    trust_remote_code=True,
-    local_files_only=True,
-)
-tokenized_input = tokenizer(
-    "This is an input test text",
+
+model.cpu()
+inputs = tokenizer(
+    """
+给定一个句子，描述用户在询问什么。
+句子：“每天早上7点设置一个闹钟”
+描述：用户在询问每天早上7点设置一个闹钟
+句子：“你能给我展示一下制作巧克力曲奇饼干的分步说明吗？”
+描述：用户在询问巧克力曲奇饼干的食谱
+句子：“你能告诉我现在几点了吗？”
+描述：用户在询问当前时间
+句子：“今天需要带雨衣吗？”
+描述：
+""",
     return_tensors="pt",
-)
-print(*tuple(tokenized_input.values()))
+).to("cpu")
 
-input_names = tokenizer.model_input_names
-print(f"{input_names=}")
-# output = model(**tokenized_input).__dict__
-# print(f"{output=}")
-# output_names = model.output_names
-# input_axes = model.input_axes
-# output_axes = model.output_axes
-# print(f"{input_names=}\n {output_names=}\n {input_axes=}\n {output_axes=}")
+import time
+
+start = time.time()
+tokens = model.generate(
+    **inputs,
+    max_new_tokens=10,
+    length_penalty=-1,
+    repetition_penalty=1.2,
+    num_beams=3,
+)
+print(time.time() - start)
+print(tokenizer.decode(tokens[0], skip_special_tokens=True))
