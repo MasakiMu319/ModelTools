@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "flake8>=7.1.1",
     "matplotlib>=3.9.3",
     "netron>=8.0.2",
     "onnx>=1.17.0",
@@ -15,6 +16,7 @@ dependencies = [
     "polars>=1.17.0",
     "pydantic>=2.10.1",
     "pyinstrument>=5.0.0",
+    "pylint>=3.3.2",
     "pytest>=8.3.3",
     "scikit-learn>=1.5.2",
     "seaborn>=0.13.2",
